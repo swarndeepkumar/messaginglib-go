@@ -8,16 +8,16 @@ import (
 	"os"
 )
 
-func Producemessage() {
-        
+func Producemessage(brokers string , topics string , values string, callback func(callbkerr string, callbkdata string)) {
+        /*
 	if len(os.Args) != 4 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <broker> <topic>\n",
 			os.Args[0])
 		os.Exit(1)
 	}
-        
-	broker := os.Args[1]
-	topic := os.Args[2]
+        */
+	broker := brokers
+	topic := topics
 
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 
@@ -27,12 +27,19 @@ func Producemessage() {
 	}
 
 	fmt.Printf("Created Producer %v\n", p)
+	
+       /// callback 
+	var callbkerr string = "myerrorec"
+        var callbkdata string = "mydbrec"
+        callback(callbkerr,callbkdata);
+	/// callback end 
+
 
 	// Optional delivery channel, if not specified the Producer object's
 	// .Events channel is used.
 	deliveryChan := make(chan kafka.Event)
 
-	value := os.Args[3]
+	value := values
 	err = p.Produce(&kafka.Message{TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny}, Value: []byte(value)}, deliveryChan)
 
 	e := <-deliveryChan
