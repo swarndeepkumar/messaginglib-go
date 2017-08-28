@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func Producemessage(brokers string , topics string , values string, callback func(callbkerr string, callbkdata string)) {
+func Producemessage(brokers string , topics string , values string, callback func(callbkerr error, callbkdata string)) {
         /*
 	if len(os.Args) != 4 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <broker> <topic>\n",
@@ -23,15 +23,15 @@ func Producemessage(brokers string , topics string , values string, callback fun
 
 	if err != nil {
 		fmt.Printf("Failed to create producer: %s\n", err)
+		callback(err, "failed");
 		os.Exit(1)
 	}
 
 	fmt.Printf("Created Producer %v\n", p)
-	
        /// callback 
-	var callbkerr string = "myerrorec"
-        var callbkdata string = "mydbrec"
-        callback(callbkerr,callbkdata);
+	//var callbkerr string = "myerrorec"
+        //var callbkdata string = "mydbrec"
+        //callback(callbkerr,callbkdata);
 	/// callback end 
 
 
@@ -47,10 +47,11 @@ func Producemessage(brokers string , topics string , values string, callback fun
 
 	if m.TopicPartition.Error != nil {
 		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+		callback(m.TopicPartition.Error, "Delivery failed");
 	} else {
 		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
-
+        callback(nil, "success");
 	close(deliveryChan)
 }

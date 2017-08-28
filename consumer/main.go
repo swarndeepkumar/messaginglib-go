@@ -10,17 +10,18 @@ import (
 	"syscall"
 )
 
-func Consumemessage() {
+func Consumemessage(brokers string, service string, topicsarr []string, callback func(callbkerr error, callbkdata string)) {
 
-	if len(os.Args) < 4 {
+	/*if len(os.Args) < 4 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <broker> <group> <topics..>\n",
 			os.Args[0])
 		os.Exit(1)
-	}
+	} */
 
-	broker := os.Args[1]
-	group := os.Args[2]
-	topics := os.Args[3:]
+	broker := brokers
+	group := service
+	//topics := os.Args[3:]
+        topics := topicsarr
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -32,15 +33,18 @@ func Consumemessage() {
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)
+		callback(err,"failed");
 		os.Exit(1)
 	}
 
 	fmt.Printf("Created Consumer %v\n", c)
 
 	err = c.SubscribeTopics(topics, nil)
-
+	if err != nil {
+		callback(err, "failed");
+	}
 	run := true
-
+//	callback(err,"success");
 	for run == true {
 		select {
 		case sig := <-sigchan:
